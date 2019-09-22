@@ -1,4 +1,23 @@
 Resources:
+  BucketImages:
+    Type: AWS::S3::Bucket
+    Properties:
+      CorsConfiguration:
+        CorsRules:
+          -
+            AllowedOrigins:
+              - http://127.0.0.1:51103
+              - http://demo-logo-classification.s3-website-eu-west-1.amazonaws.com
+            AllowedMethods:
+              - PUT
+            AllowedHeaders:
+              - "*"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
   LambdaRole:
     Type: AWS::IAM::Role
     Properties:
@@ -29,9 +48,8 @@ Resources:
                   - s3:PutObject
                   - s3:PutObjectAcl
                 Resource:
-                  - arn:aws:s3:::put-images-event/*
+                  - !Sub arn:aws:s3:::${BucketImages}/*
       
-
   TestLambda:
     Type: AWS::Lambda::Function
     Properties:
@@ -40,5 +58,9 @@ Resources:
       Handler: index.handler
       Role: !GetAtt LambdaRole.Arn
       Runtime: nodejs8.10
+      Environment: 
+        Variables:
+          REGION: eu-west-1
+          uploadBucket: !Ref BucketImages
 
         
