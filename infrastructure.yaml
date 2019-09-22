@@ -18,6 +18,68 @@ Resources:
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
 
+  GetRestAPI:
+    Type: AWS::ApiGateway::RestApi
+    Properties: 
+      Name: scalableLogo-GetRestAPI
+
+  GetRestAPIResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref GetRestAPI
+      ParentId: { "Fn::GetAtt": ["GetRestAPI", "RootResourceId"] }
+      PathPart: get-url
+
+  GetRestAPIMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ResourceId: !Ref GetRestAPIResource
+      RestApiId: !Ref GetRestAPI
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        IntegrationHttpMethod: GET
+        Type: AWS_PROXY
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetLambda.Arn}/invocations
+      MethodResponses:
+        - 
+          StatusCode: 200
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+
+  GetRestAPIMethodOptions:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ResourceId: !Ref GetRestAPIResource
+      RestApiId: !Ref GetRestAPI
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          -
+            StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: ''
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+        - 
+          StatusCode: 200
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+
   LambdaRole:
     Type: AWS::IAM::Role
     Properties:
@@ -50,7 +112,7 @@ Resources:
                 Resource:
                   - !Sub arn:aws:s3:::${BucketImages}/*
       
-  TestLambda:
+  GetLambda:
     Type: AWS::Lambda::Function
     Properties:
       Code: ./lambda_functions/get_function/index.js
@@ -60,7 +122,7 @@ Resources:
       Runtime: nodejs8.10
       Environment: 
         Variables:
-          REGION: eu-west-1
+          REGION: !Ref AWS::Region
           uploadBucket: !Ref BucketImages
 
         
