@@ -1,3 +1,5 @@
+const API_URL = 'https://lxnqvybhq3.execute-api.eu-west-1.amazonaws.com/new/get-url'
+
 function getBinary(input) {
     const file = input.files[0];
     const reader = new FileReader();
@@ -15,7 +17,7 @@ async function uploadImage(binary, filetype) {
     
     const response = await axios({
         method: 'GET',
-        url: 'https://lxnqvybhq3.execute-api.eu-west-1.amazonaws.com/new/get-url',
+        url: API_URL,
         params: {imageType: filetype}
     })
                 
