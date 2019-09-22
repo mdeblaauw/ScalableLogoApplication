@@ -1,0 +1,44 @@
+Resources:
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        -
+          PolicyName: lambdaSignURL
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              -
+                Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+              -
+                Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:PutObjectAcl
+                Resource:
+                  - arn:aws:s3:::put-images-event/*
+      
+
+  TestLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code: index.py
+      FunctionName: testCloudFormation
+      Handler: index.boobie
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: python3.7
+
+        
