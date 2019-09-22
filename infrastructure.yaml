@@ -35,10 +35,10 @@ Resources:
   TestLambda:
     Type: AWS::Lambda::Function
     Properties:
-      Code: index.py
-      FunctionName: testCloudFormation
-      Handler: index.boobie
+      Code: ./lambda_functions/get_function/index.js
+      FunctionName: logoApplicationGetter
+      Handler: index.handler
       Role: !GetAtt LambdaRole.Arn
-      Runtime: python3.7
+      Runtime: nodejs8.10
 
         
