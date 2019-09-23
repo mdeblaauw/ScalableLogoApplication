@@ -152,4 +152,11 @@ Resources:
           REGION: !Ref AWS::Region
           uploadBucket: !Ref BucketImages
 
+Outputs:
+  GetAPIURL:
+    Description: URL of get API
+    Value: !Sub https://${GetRestAPI}.execute-api.${AWS::Region}.amazonaws.com/prod/get-url
+    Export:
+      Name: GetApiURL
+
         

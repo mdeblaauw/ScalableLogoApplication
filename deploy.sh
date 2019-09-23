@@ -15,6 +15,9 @@ elif [ $input1 == "delete" ]; then
 else
     aws cloudformation package --template-file $templateFile --s3-bucket $bucketName --output-template-file $outTemplateFile
     aws cloudformation deploy --template-file $outTemplateFile --stack-name $stackName --capabilities "CAPABILITY_IAM"
+
+    echo This is the get image url API
+    aws cloudformation list-exports --query "Exports[?Name==\`GetApiURL\`].Value"
 fi
 
 
