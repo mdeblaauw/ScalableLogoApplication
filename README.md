@@ -1,6 +1,6 @@
 # ScalableLogoApplication
 
-This serverless application is an implementation of my thesis work. Wherein is researched if a logo classifier can be prepared on any logo class with only five logo samples.
+This serverless application is an implementation of my thesis work. Wherein was researched if a logo classifier can be prepared on any logo class with only five logo samples.
 To run this application a few prerequisites are needed:
 
 1. Install AWS CLI and configure your AWS account.
