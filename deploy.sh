@@ -1,7 +1,7 @@
 #!/bin/bash
 
 input1="$1"
-bucketName=blaauwtestbucket
+bucketName=logoapplication-lambdafiles-34fl9as0
 stackName=logoApplication
 templateFile=infrastructure.yaml
 outTemplateFile=infrastructure.packaged.yaml
