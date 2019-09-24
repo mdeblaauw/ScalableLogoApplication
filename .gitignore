@@ -1,1 +1,6 @@
 infrastructure.packaged.yaml
+
+*.zip
+
+.DS_Store
+.DS_Store?
