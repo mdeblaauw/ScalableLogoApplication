@@ -18,6 +18,9 @@ else
 
     echo This is the get image url API
     aws cloudformation list-exports --query "Exports[?Name==\`GetApiURL\`].Value"
+
+    echo This is the website url
+    aws cloudformation list-exports --query "Exports[?Name==\`WebsiteURL\`].Value"
 fi
 
 
