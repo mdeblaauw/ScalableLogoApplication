@@ -6,8 +6,7 @@ Resources:
         CorsRules:
           -
             AllowedOrigins:
-              - http://127.0.0.1:51103
-              - http://demo-logo-classification.s3-website-eu-west-1.amazonaws.com
+              - !GetAtt WebsiteBucket.WebsiteURL
             AllowedMethods:
               - PUT
             AllowedHeaders:
