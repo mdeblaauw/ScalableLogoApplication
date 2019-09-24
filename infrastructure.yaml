@@ -6,8 +6,7 @@ Resources:
         CorsRules:
           -
             AllowedOrigins:
-              - http://127.0.0.1:51103
-              - http://demo-logo-classification.s3-website-eu-west-1.amazonaws.com
+              - !GetAtt WebsiteBucket.WebsiteURL
             AllowedMethods:
               - PUT
             AllowedHeaders:
@@ -152,11 +151,38 @@ Resources:
           REGION: !Ref AWS::Region
           uploadBucket: !Ref BucketImages
 
+  WebsiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: logoapplication-website-39bk35l8
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Effect: Allow
+            Principal: "*"
+            Action: s3:GetObject
+            Resource: !Sub ${WebsiteBucket.Arn}/*
+
+  WebsiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: logoapplication-website-39bk35l8
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+      WebsiteConfiguration:
+        IndexDocument: index.html
+
 Outputs:
   GetAPIURL:
     Description: URL of get API
     Value: !Sub https://${GetRestAPI}.execute-api.${AWS::Region}.amazonaws.com/prod/get-url
     Export:
       Name: GetApiURL
+  WebsiteUrl:
+    Description: URL of the website
+    Value: !GetAtt WebsiteBucket.WebsiteURL
+    Export:
+      Name: WebsiteURL
 
         
