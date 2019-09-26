@@ -10,4 +10,4 @@ infrastructure.packaged.yaml
 .DS_Store
 .DS_Store?
 
-/lambda_dependencies/*
+lambda_dependencies/
