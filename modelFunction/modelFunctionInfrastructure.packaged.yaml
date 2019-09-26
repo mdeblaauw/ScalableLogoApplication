@@ -4,7 +4,34 @@ Resources:
     Properties: {}
   ImageBucket:
     Type: AWS::S3::Bucket
-    Properties: {}
+    DependsOn:
+    - ModelFunctionLambdaImageBucket
+    - ModelFunctionLambda
+    Properties:
+      BucketName:
+        Fn::Sub: image-logoapplication-${AWS::AccountId}
+      NotificationConfiguration:
+        LambdaConfigurations:
+        - Event: s3:ObjectCreated:Put
+          Filter:
+            S3Key:
+              Rules:
+              - Name: suffix
+                Value: .jpg
+          Function:
+            Fn::GetAtt:
+            - ModelFunctionLambda
+            - Arn
+        - Event: s3:ObjectCreated:Put
+          Filter:
+            S3Key:
+              Rules:
+              - Name: suffix
+                Value: .png
+          Function:
+            Fn::GetAtt:
+            - ModelFunctionLambda
+            - Arn
   OutputDatabase:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -56,7 +83,9 @@ Resources:
             - s3:ListBucket
             Resource:
             - Fn::Sub: ${PreparationBucket.Arn}/*
-            - Fn::Sub: ${ImageBucket.Arn}/*
+            - Fn::Sub: ${PreparationBucket.Arn}
+            - Fn::Sub: arn:aws:s3:::image-logoapplication-${AWS::AccountId}/*
+            - Fn::Sub: arn:aws:s3:::image-logoapplication-${AWS::AccountId}
           - Effect: Allow
             Action: dynamodb:PutItem
             Resource:
@@ -69,7 +98,6 @@ Resources:
       Code:
         S3Bucket: logoapplication-lambdafiles-34fl9as0
         S3Key: 363a2f296e3210ff2e59a83b1b44d8de
-      FunctionName: logoApplicationModelFunction
       Handler: lambda_function.lambda_handler
       Role:
         Fn::GetAtt:
@@ -78,11 +106,24 @@ Resources:
       Runtime: python3.6
       Layers:
       - Ref: PytorchLambdaLayer
+      MemorySize: 512
+      Timeout: 60
       Environment:
         Variables:
           TableName:
             Ref: OutputDatabase
           image_bucket:
-            Ref: ImageBucket
+            Fn::Sub: image-logoapplication-${AWS::AccountId}
           preparation_bucket:
             Ref: PreparationBucket
+  ModelFunctionLambdaImageBucket:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+        - ModelFunctionLambda
+        - Arn
+      Principal: s3.amazonaws.com
+      SourceArn:
+        Fn::Sub: arn:aws:s3:::image-logoapplication-${AWS::AccountId}
