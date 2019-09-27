@@ -1,0 +1,125 @@
+Resources:
+  PreparationBucket:
+    Type: AWS::S3::Bucket
+    Properties: {}
+
+  ImageBucket:
+    Type: AWS::S3::Bucket
+    DependsOn:
+      - ModelFunctionLambdaImageBucket
+      - ModelFunctionLambda
+    Properties:
+      BucketName: !Sub image-logoapplication-${AWS::AccountId}
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - 
+            Event: s3:ObjectCreated:Put
+            Filter: 
+              S3Key:
+                Rules:
+                  - 
+                    Name: suffix
+                    Value: .jpg
+            Function: !GetAtt ModelFunctionLambda.Arn
+          - 
+            Event: s3:ObjectCreated:Put
+            Filter:
+              S3Key:
+                Rules:
+                  -
+                    Name: suffix
+                    Value: .png
+            Function: !GetAtt ModelFunctionLambda.Arn
+
+  OutputDatabase:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        -
+          AttributeName: ImageId
+          AttributeType: S
+        - 
+          AttributeName: Timestamp
+          AttributeType: N
+      KeySchema:
+        -
+         AttributeName: ImageId
+         KeyType: HASH
+        -
+          AttributeName: Timestamp
+          KeyType: RANGE 
+      ProvisionedThroughput: 
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+
+  PytorchLambdaLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      CompatibleRuntimes:
+        - python3.6
+      Content: ../lambda_functions/model_function/lambda_dependencies/pytorch1_0_1
+
+  ModelFunctionLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        -
+          PolicyName: lambdaModelFunction
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              -
+                Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+              -
+                Effect: Allow
+                Action: 
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub ${PreparationBucket.Arn}/*
+                  - !Sub ${PreparationBucket.Arn}
+                  - !Sub arn:aws:s3:::image-logoapplication-${AWS::AccountId}/*
+                  - !Sub arn:aws:s3:::image-logoapplication-${AWS::AccountId}
+              -
+                Effect: Allow
+                Action: dynamodb:PutItem
+                Resource: !GetAtt OutputDatabase.Arn
+      
+  ModelFunctionLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code: ../lambda_functions/model_function/lambda_files/
+      Handler: lambda_function.lambda_handler
+      Role: !GetAtt ModelFunctionLambdaRole.Arn
+      Runtime: python3.6
+      Layers: 
+        - !Ref PytorchLambdaLayer
+      MemorySize: 512
+      Timeout: 60
+      Environment: 
+        Variables:
+          TableName: !Ref OutputDatabase
+          image_bucket: !Sub image-logoapplication-${AWS::AccountId}
+          preparation_bucket: !Ref PreparationBucket
+
+  ModelFunctionLambdaImageBucket:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt ModelFunctionLambda.Arn
+      Principal: s3.amazonaws.com
+      SourceArn: !Sub arn:aws:s3:::image-logoapplication-${AWS::AccountId}
+        

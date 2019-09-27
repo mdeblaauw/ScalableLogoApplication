@@ -2,13 +2,11 @@
 
 input1="$1"
 bucketName=logoapplication-lambdafiles-34fl9as0
-stackName=logoApplication
-templateFile=infrastructureV2.yaml
-outTemplateFile=infrastructure.packaged.yaml
+stackName=modelFunction
+templateFile=modelFunctionInfrastructure.yaml
+outTemplateFile=modelFunctionInfrastructure.packaged.yaml
 
-if [ $input1 == "update" ]; then
-    aws cloudformation update-stack --stack-name $stackName
-elif [ $input1 == "delete" ]; then
+if [ $input1 == "delete" ]; then
     echo deleting stack
     aws cloudformation delete-stack --stack-name $stackName
     echo deleting succeeded
