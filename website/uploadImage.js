@@ -1,4 +1,4 @@
-const API_URL = 'https://5qfrh8p462.execute-api.eu-west-1.amazonaws.com/prod/get-url'
+const API_URL = 'https://bvf8r66553.execute-api.eu-west-1.amazonaws.com/prod/get-url'
 
 function getBinary(input) {
     const file = input.files[0];
