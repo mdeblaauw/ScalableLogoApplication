@@ -21,6 +21,9 @@ else
 
     echo This is the website url
     aws cloudformation list-exports --query "Exports[?Name==\`WebsiteURL\`].Value"
+
+    echo This is the name of the preparation bucket
+    aws cloudformation list-exports --query "Exports[?Name==\`PrepBucketName\`].Value"
 fi
 
 

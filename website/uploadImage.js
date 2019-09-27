@@ -1,25 +1,11 @@
-const API_URL = 'https://bvf8r66553.execute-api.eu-west-1.amazonaws.com/prod/get-url'
-
-function getBinary(input) {
-    const file = input.files[0];
-    const reader = new FileReader();
-    reader.readAsBinaryString(file);
-    reader.onload = function () {
-        return uploadImage(reader.result, file.type);
-    }
-    reader.onerror = function (error) {
-        console.log('Error: ', error);
-    }
-}
-            
 async function uploadImage(binary, filetype) {
     console.log('Uploading:', binary);
     
     const response = await axios({
         method: 'GET',
-        url: API_URL,
+        url: API_URL + "/get-url",
         params: {imageType: filetype}
-    })
+    });
                 
     console.log('Response:', response.data);
                 
@@ -27,7 +13,7 @@ async function uploadImage(binary, filetype) {
     let array = [];
     for (var i = 0; i < binary.length; i++) {
         array.push(binary.charCodeAt(i));
-    }
+    };
                 
     let blobData = new Blob([new Uint8Array(array)], {type: filetype});
                 
@@ -40,5 +26,7 @@ async function uploadImage(binary, filetype) {
         method:'put',
         url:response.data.uploadURL,
         data: blobData
-    })
+    });
+
+    return response.data.imageId
 }       
