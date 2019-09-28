@@ -1,4 +1,4 @@
-Description: This template includes infrastructure and modelFunction infrastructure
+Description: This template includes infrastructure, modelFunction infrastructure and get label infrastructure
 Resources:
   ImageBucket:
     Type: AWS::S3::Bucket
@@ -108,6 +108,67 @@ Resources:
             method.response.header.Access-Control-Allow-Methods: false
             method.response.header.Access-Control-Allow-Origin: false
 
+  LabelRestAPIResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref GetRestAPI
+      ParentId: { "Fn::GetAtt": ["GetRestAPI", "RootResourceId"] }
+      PathPart: get-label
+
+  LabelRestAPIMethod:
+    DependsOn: GetLambdaAPIPermission
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ResourceId: !Ref LabelRestAPIResource
+      RestApiId: !Ref GetRestAPI
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetLambda.Arn}/invocations
+        IntegrationResponses:
+          - StatusCode: 200
+      MethodResponses:
+        - 
+          StatusCode: 200
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+
+  LabelRestAPIMethodOptions:
+    DependsOn: GetLambdaAPIPermission
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ResourceId: !Ref LabelRestAPIResource
+      RestApiId: !Ref GetRestAPI
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          -
+            StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: ''
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+        - 
+          StatusCode: 200
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+
   GetRestAPIStage:
     Type: AWS::ApiGateway::Stage
     Properties:
@@ -119,6 +180,8 @@ Resources:
     DependsOn: 
       - GetRestAPIMethod
       - GetRestAPIMethodOptions
+      - LabelRestAPIMethod
+      - LabelRestAPIMethodOptions
     Type: AWS::ApiGateway::Deployment
     Properties:
       RestApiId: !Ref GetRestAPI
@@ -162,6 +225,10 @@ Resources:
                   - s3:PutObjectAcl
                 Resource:
                   - !Sub arn:aws:s3:::image-logoapplication-${AWS::AccountId}/*
+              -
+                Effect: Allow
+                Action: dynamodb:GetItem
+                Resource: !GetAtt OutputDatabase.Arn
       
   GetLambda:
     Type: AWS::Lambda::Function
@@ -171,10 +238,12 @@ Resources:
       Handler: index.handler
       Role: !GetAtt LambdaRole.Arn
       Runtime: nodejs8.10
+      Timeout: 10
       Environment: 
         Variables:
           REGION: !Ref AWS::Region
           uploadBucket: !Sub image-logoapplication-${AWS::AccountId}
+          TableName: !Ref OutputDatabase
 
   WebsiteBucketPolicy:
     Type: AWS::S3::BucketPolicy
@@ -209,16 +278,10 @@ Resources:
         -
           AttributeName: ImageId
           AttributeType: S
-        - 
-          AttributeName: Timestamp
-          AttributeType: N
       KeySchema:
         -
          AttributeName: ImageId
          KeyType: HASH
-        -
-          AttributeName: Timestamp
-          KeyType: RANGE 
       ProvisionedThroughput: 
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
@@ -297,7 +360,7 @@ Resources:
 Outputs:
   GetAPIURL:
     Description: URL of get API
-    Value: !Sub https://${GetRestAPI}.execute-api.${AWS::Region}.amazonaws.com/prod/get-url
+    Value: !Sub https://${GetRestAPI}.execute-api.${AWS::Region}.amazonaws.com/prod
     Export:
       Name: GetApiURL
   WebsiteUrl:
@@ -308,5 +371,7 @@ Outputs:
   PreparationBucketName:
     Description: Name of bucket to dump preparation files
     Value: !Ref PreparationBucket
+    Export:
+      Name: PrepBucketName
 
         
