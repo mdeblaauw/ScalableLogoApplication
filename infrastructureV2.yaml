@@ -238,6 +238,7 @@ Resources:
       Handler: index.handler
       Role: !GetAtt LambdaRole.Arn
       Runtime: nodejs8.10
+      Timeout: 10
       Environment: 
         Variables:
           REGION: !Ref AWS::Region
