@@ -245,7 +245,7 @@ Resources:
     Properties:
       Code:
         S3Bucket: logoapplication-lambdafiles-34fl9as0
-        S3Key: 240580c62e4b97333b3d8dcf3e7044d4
+        S3Key: a3f212a2e13b1b220b4e548a8e7cad88
       FunctionName: logoApplicationGetter
       Handler: index.handler
       Role:

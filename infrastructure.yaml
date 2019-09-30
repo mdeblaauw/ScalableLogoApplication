@@ -407,6 +407,7 @@ Resources:
                   - s3:GetObject
                   - s3:DeleteObject
                   - s3:ListBucket
+                  - s3:PutObject
                 Resource:
                   - !Sub arn:aws:s3:::preparation-logoapplication-${AWS::AccountId}/*
                   - !Sub arn:aws:s3:::preparation-logoapplication-${AWS::AccountId}
@@ -423,7 +424,7 @@ Resources:
       Handler: lambda_function.lambda_handler
       Layers:
         - !Ref PytorchLambdaLayer
-      MemorySize: 832
+      MemorySize: 2048
       Role: !GetAtt PreparationFunctionLambdaRole.Arn
       Runtime: python3.6
       Timeout: 120

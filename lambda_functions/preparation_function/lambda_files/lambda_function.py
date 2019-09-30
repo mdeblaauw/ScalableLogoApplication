@@ -13,7 +13,6 @@ from protonet import *
 s3 = boto3.client('s3')
 embedding_dim = 256
 distance = "gaussian"
-k_way = 5
 n_shot = 5
 
 def lambda_handler(event, context):
@@ -28,7 +27,7 @@ def lambda_handler(event, context):
     support_batch = transformToTensor(images_path)
     print(support_batch.shape)
     model = install_model()
-    prototypes, S = createPrototypes(model, support_batch)
+    prototypes, S = createPrototypes(model, support_batch, len(reverse_class_mapping))
     saveAndStorePreparationFiles(prototypes, S, reverse_class_mapping, bucket)
     dumpWebsiteImages(website_image_path, reverse_class_mapping)
     
@@ -119,7 +118,7 @@ def install_model():
     model.eval()
     return model
     
-def createPrototypes(model, support_batch):
+def createPrototypes(model, support_batch, k_way):
     embeddings = model(support_batch)
     support, raw_covariance_matrix = torch.split(embeddings, [embedding_dim, embedding_dim], dim=1)
     inv_covariance_matrix = calculate_inverse_covariance_matrix(raw_covariance_matrix, 1.0)
