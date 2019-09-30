@@ -14,12 +14,21 @@ embedding_dim = 256
 distance = "gaussian"
 
 def lambda_handler(event, context):
-    load_and_store_files()
-    print(event)
-    query,file_key = get_image(event)
-    model = install_model()
-    values = make_inference(query, model)
-    store_values(values, file_key)
+    for record in event['Records']:
+        bucket = record['s3']['bucket']['name']
+        file_key = record['s3']['object']['key']
+        print(bucket)
+        print(file_key)
+        
+    if bucket == os.environ['preparation_bucket']:
+        prepare_model("/tmp/preparation-files")
+    else:
+        load_and_store_files("/tmp/model-weights", "/tmp/preparation-files")
+        print(event)
+        query,file_key = get_image(event)
+        model = install_model()
+        values = make_inference(query, model)
+        store_values(values, file_key)
 
     return {
         'statusCode': 200,
@@ -27,9 +36,7 @@ def lambda_handler(event, context):
     }
 
 
-def load_and_store_files():
-    weight_path = "/tmp/model-weights"
-    prepare_path = "/tmp/preparation-files"
+def load_and_store_files(weight_path, prepare_path):
     if not os.path.isdir(weight_path):
         os.mkdir(weight_path)
         content = s3.list_objects_v2(Bucket=os.environ['preparation_bucket'], Prefix='model-weights')
@@ -46,6 +53,12 @@ def load_and_store_files():
         s3.download_file(os.environ['preparation_bucket'], 'preparation-files/reverse_class_mapping.json',
                          prepare_path + '/reverse_class_mapping.json')
 
+def prepare_model(prepare_path):
+    if not os.path.isdir(prepare_path):
+        os.mkdir(prepare_path)
+    s3.download_file(os.environ['preparation_bucket'], 'preparation-files/S.pt', prepare_path + '/S.pt')
+    s3.download_file(os.environ['preparation_bucket'], 'preparation-files/prototypes.pt',prepare_path + '/prototypes.pt')
+    s3.download_file(os.environ['preparation_bucket'], 'preparation-files/reverse_class_mapping.json',prepare_path + '/reverse_class_mapping.json')
 
 def get_image(event):
     for record in event['Records']:

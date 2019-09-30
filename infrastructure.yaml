@@ -282,12 +282,29 @@ Resources:
                     Name: suffix
                     Value: .zip
             Function: !GetAtt PreparationFunctionLambda.Arn
+          -
+            Event: s3:ObjectCreated:Put
+            Filter:
+              S3Key:
+                Rules:
+                  -
+                    Name: suffix
+                    Value: .json
+            Function: !GetAtt ModelFunctionLambda.Arn
 
   PreparationLambdaPermission:
     Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:InvokeFunction
       FunctionName: !GetAtt PreparationFunctionLambda.Arn
+      Principal: s3.amazonaws.com
+      SourceArn: !Sub arn:aws:s3:::preparation-logoapplication-${AWS::AccountId}
+
+  PreparationModelFunctionLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt ModelFunctionLambda.Arn
       Principal: s3.amazonaws.com
       SourceArn: !Sub arn:aws:s3:::preparation-logoapplication-${AWS::AccountId}
 

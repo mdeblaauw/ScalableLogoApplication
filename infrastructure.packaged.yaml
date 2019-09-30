@@ -245,7 +245,7 @@ Resources:
     Properties:
       Code:
         S3Bucket: logoapplication-lambdafiles-34fl9as0
-        S3Key: a3f212a2e13b1b220b4e548a8e7cad88
+        S3Key: f155be9ed18f45d5ec7f90f0eb3cb380
       FunctionName: logoApplicationGetter
       Handler: index.handler
       Role:
@@ -299,6 +299,16 @@ Resources:
             Fn::GetAtt:
             - PreparationFunctionLambda
             - Arn
+        - Event: s3:ObjectCreated:Put
+          Filter:
+            S3Key:
+              Rules:
+              - Name: suffix
+                Value: .json
+          Function:
+            Fn::GetAtt:
+            - ModelFunctionLambda
+            - Arn
   PreparationLambdaPermission:
     Type: AWS::Lambda::Permission
     Properties:
@@ -306,6 +316,17 @@ Resources:
       FunctionName:
         Fn::GetAtt:
         - PreparationFunctionLambda
+        - Arn
+      Principal: s3.amazonaws.com
+      SourceArn:
+        Fn::Sub: arn:aws:s3:::preparation-logoapplication-${AWS::AccountId}
+  PreparationModelFunctionLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+        - ModelFunctionLambda
         - Arn
       Principal: s3.amazonaws.com
       SourceArn:
@@ -371,7 +392,7 @@ Resources:
     Properties:
       Code:
         S3Bucket: logoapplication-lambdafiles-34fl9as0
-        S3Key: d02f06e2e93d4705e6cafe19a62b8ba8
+        S3Key: 3a11bbe8032e1d73f5944fb8786d5508
       Handler: lambda_function.lambda_handler
       Role:
         Fn::GetAtt:
@@ -427,6 +448,7 @@ Resources:
             - s3:GetObject
             - s3:DeleteObject
             - s3:ListBucket
+            - s3:PutObject
             Resource:
             - Fn::Sub: arn:aws:s3:::preparation-logoapplication-${AWS::AccountId}/*
             - Fn::Sub: arn:aws:s3:::preparation-logoapplication-${AWS::AccountId}
@@ -437,14 +459,14 @@ Resources:
     Properties:
       Code:
         S3Bucket: logoapplication-lambdafiles-34fl9as0
-        S3Key: 7deff64dcb9abcd6eda6e8266574d3ed
+        S3Key: 4fa94db47bc424a60e72f01191cbb3f4
       Environment:
         Variables:
           website_bucket: logoapplication-website-39bk35l8
       Handler: lambda_function.lambda_handler
       Layers:
       - Ref: PytorchLambdaLayer
-      MemorySize: 832
+      MemorySize: 2048
       Role:
         Fn::GetAtt:
         - PreparationFunctionLambdaRole
