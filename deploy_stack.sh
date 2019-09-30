@@ -3,7 +3,7 @@
 input1="$1"
 bucketName=logoapplication-lambdafiles-34fl9as0
 stackName=logoApplication
-templateFile=infrastructureV2.yaml
+templateFile=infrastructure.yaml
 outTemplateFile=infrastructure.packaged.yaml
 
 if [ $input1 == "update" ]; then

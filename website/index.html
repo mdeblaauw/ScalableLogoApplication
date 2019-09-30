@@ -8,13 +8,14 @@
         
         <input type="file" id="avatar" name="avatar"
        accept="image/png, image/jpeg", onchange="getBinary(this);"/>
-       <p id="result"></p>
+       <p id="label"></p>
+       <p id="probability"></p>
         
         <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
         <script src="./uploadImage.js" type="text/javascript"></script>
         <script src="./getLabel.js" type="text/javascript"></script>
         <script>
-            const API_URL = 'https://e62yrr3c4b.execute-api.eu-west-1.amazonaws.com/prod'
+            const API_URL = 'https://jyzeh86m1h.execute-api.eu-west-1.amazonaws.com/prod'
 
             function getBinary(input) {
                 const file = input.files[0];

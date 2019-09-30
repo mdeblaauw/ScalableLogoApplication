@@ -19,7 +19,8 @@ async function getLabel(imageId) {
                 params: {imageId: imageId}
             });
             if(response.data) {
-                document.getElementById("result").innerHTML = response.data.ProbLabel.S
+                document.getElementById("label").innerHTML = response.data.ProbLabel.S
+                document.getElementById("probability").innerHTML = response.data.MaxProb.N
                 return console.log(response.data.ProbLabel.S);
             }
             console.log(count);
