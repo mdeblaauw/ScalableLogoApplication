@@ -9,5 +9,6 @@ To run this application a few prerequisites are needed:
 4. Create an S3 bucket with name 'logoapplication-lambdafiles-34fl9as0'. This bucket stores the lambda functions.
 5. Run deploy_stack.sh. This implements the serverless application with cloudformation (https://aws.nz/best-practice/cloudformation-package-deploy/).
 6. Put the model weights and preparation files in the preparation bucket by, respectively, using 'preparation bucket name'/model-weights/ and 'preparation bucket name'/preparation-files/.
-6. Put the output URL of the upload image api in the 'website/uploadImage.js' file.
-7. Run deploy_website.sh, which uploads the website contents to an S3 bucket.
+7. zip the support set with command 'zip -r preparation.zip support_set/' and dump it in the preparation bucket.
+8. Put the output URL of the upload image api in the 'website/uploadImage.js' file.
+9. Run deploy_website.sh, which uploads the website contents to an S3 bucket.
