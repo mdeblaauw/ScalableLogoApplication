@@ -1,0 +1,169 @@
+/* Reset */
+* {
+    margin:0;
+    padding:0;
+    box-sizing: border-box;
+}
+
+/* Main Styling */
+html, body {
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.7em;
+}
+
+a {
+    color: #333;
+    text-decoration:none;
+}
+
+h1, h2, h3 {
+    padding: 20px 0;
+    color:#fff;
+}
+
+p {
+    margin: 10px 0;
+    color: #fff;
+}
+
+/* Utility classes */
+
+.container {
+    margin: auto;
+    max-width: 1100px;
+}
+
+.text-primary {
+    font-size: 49px;
+    line-height: 1.3em;
+    color: #f7c08a;
+}
+
+.lead {
+    font-size: 20px;
+    line-height: 1.7em;
+    padding-bottom: 120px;
+}
+
+.btn {
+    padding:30px 40px;
+    background: #333;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 8px;
+    font-size: 20px;
+}
+
+.btn:hover {
+    background:#444;
+    color:#f7c08a;
+}
+
+/* Navbar */
+
+#navbar {
+    background:#333;
+    color:#fff;
+    overflow: auto;
+}
+
+#navbar ul {
+    float: left;
+}
+
+#navbar ul li {
+    float: left;
+    list-style:none;
+}
+
+#navbar ul li a {
+    display: block;
+    text-align: center;
+    padding: 20px;
+    color:#fff;
+}
+
+#navbar ul li a:hover, 
+#navbar ul li .current {
+    background: #444;
+    color: #f7c08a;
+}
+
+/* Showcase */
+#showcase{
+    background: url('../img/logos.jpg') no-repeat center center/cover;
+    height:850px;
+}
+
+#showcase .showcase-content {
+    text-align: center;
+    padding-top: 60px;
+}
+
+#showcase .showcase-content #input-button {
+    width: 0.1px;
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+	z-index: -1;
+}
+
+/* implement with javascript */
+#showcase .showcase-content #answer {
+    /* visibility: hidden; */
+}
+
+#showcase .showcase-content #output {
+    padding-top: 100px;
+    font-size: 20px;
+}
+
+/* #classes img {
+    width: 100px;
+    height: 100px;
+}
+
+#classes figure {
+    margin:0;
+    padding: 3px;
+    float: left;
+}
+
+#classes figure figcaption {
+    text-align: center;
+} */
+
+/* #navigation ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    background: #4c6ca0;
+    border: 3px #4c6ca0 solid;
+    border-radius: 5px;
+    overflow: auto;
+}
+
+#navigation ul li {
+    float: left;
+}
+
+#navigation ul li a {
+    text-decoration: none;
+    display: block;
+    color: #fff;
+    padding: 15px 20px;
+
+}
+
+#navigation ul li a:hover {
+    background-color: #446190
+}
+
+.clr {
+    clear: both;
+} */
+
+/* a:hover {
+    color: coral;
+} */
