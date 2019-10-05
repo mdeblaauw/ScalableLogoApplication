@@ -19,8 +19,11 @@ async function getLabel(imageId) {
                 params: {imageId: imageId}
             });
             if(response.data) {
-                document.getElementById("label").innerHTML = response.data.ProbLabel.S
-                document.getElementById("probability").innerHTML = response.data.MaxProb.N
+                console.log(response.data);
+                const probLabel = response.data.ProbLabel.S;
+                let maxProb = response.data.MaxProb.N * 100;
+                const answer = `The model is ${maxProb.toFixed(0)}% sure that the ${probLabel} logo is in the submitted picture.`;
+                document.getElementById("output").innerHTML = answer;
                 return console.log(response.data.ProbLabel.S);
             }
             console.log(count);

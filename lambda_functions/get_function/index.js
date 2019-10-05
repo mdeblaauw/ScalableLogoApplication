@@ -11,7 +11,9 @@ exports.handler = async (event, context) => {
   if (event.path === '/get-url') {
     const imageType = event.queryStringParameters.imageType;
     return await getUploadURL(imageType);
-  } else {
+  } else if (event.path === '/get-support-set') {
+    return await getSupportURLs();
+  }else {
     const imageId = event.queryStringParameters.imageId;
     return await getLabel(imageId);
   }
@@ -79,5 +81,29 @@ const getLabel = async function(imageId) {
       
     });
   })
+};
+
+const getSupportURLs = async function () {
+  const params = {
+    Bucket: process.env.websiteBucket,
+    Prefix: 'preparation-images/'
+  };
+  
+  const data = await s3.listObjectsV2(params).promise();
+  const object = {};
+  for (var i = 0; i < data.Contents.length; i++) {
+    object[`file${i}`] = data.Contents[i].Key;
+  }
+
+  return new Promise((resolve, reject) => {
+    return resolve({
+      "statusCode": 200,
+      "isBase64Encoded": false,
+      "headers": {
+        "Access-Control-Allow-Origin": "*"
+      },
+      "body": JSON.stringify(object)
+    });
+  });
 };
 
