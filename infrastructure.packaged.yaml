@@ -178,6 +178,70 @@ Resources:
           method.response.header.Access-Control-Allow-Headers: false
           method.response.header.Access-Control-Allow-Methods: false
           method.response.header.Access-Control-Allow-Origin: false
+  SupportRestAPIResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: GetRestAPI
+      ParentId:
+        Fn::GetAtt:
+        - GetRestAPI
+        - RootResourceId
+      PathPart: get-support-set
+  SupportRestAPIMethod:
+    DependsOn: GetLambdaAPIPermission
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ResourceId:
+        Ref: SupportRestAPIResource
+      RestApiId:
+        Ref: GetRestAPI
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetLambda.Arn}/invocations
+        IntegrationResponses:
+        - StatusCode: 200
+      MethodResponses:
+      - StatusCode: 200
+        ResponseModels:
+          application/json: Empty
+        ResponseParameters:
+          method.response.header.Access-Control-Allow-Origin: false
+  SupportRestAPIMethodOptions:
+    DependsOn: GetLambdaAPIPermission
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ResourceId:
+        Ref: SupportRestAPIResource
+      RestApiId:
+        Ref: GetRestAPI
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'''
+            method.response.header.Access-Control-Allow-Methods: '''GET,OPTIONS'''
+            method.response.header.Access-Control-Allow-Origin: '''*'''
+          ResponseTemplates:
+            application/json: ''
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+      - StatusCode: 200
+        ResponseModels:
+          application/json: Empty
+        ResponseParameters:
+          method.response.header.Access-Control-Allow-Headers: false
+          method.response.header.Access-Control-Allow-Methods: false
+          method.response.header.Access-Control-Allow-Origin: false
   GetRestAPIStage:
     Type: AWS::ApiGateway::Stage
     Properties:
@@ -192,6 +256,8 @@ Resources:
     - GetRestAPIMethodOptions
     - LabelRestAPIMethod
     - LabelRestAPIMethodOptions
+    - SupportRestAPIMethod
+    - SupportRestAPIMethodOptions
     Type: AWS::ApiGateway::Deployment
     Properties:
       RestApiId:
@@ -235,6 +301,10 @@ Resources:
             Resource:
             - Fn::Sub: arn:aws:s3:::image-logoapplication-${AWS::AccountId}/*
           - Effect: Allow
+            Action: s3:ListBucket
+            Resource:
+              Fn::Sub: arn:aws:s3:::${WebsiteBucket}
+          - Effect: Allow
             Action: dynamodb:GetItem
             Resource:
               Fn::GetAtt:
@@ -245,7 +315,7 @@ Resources:
     Properties:
       Code:
         S3Bucket: logoapplication-lambdafiles-34fl9as0
-        S3Key: f155be9ed18f45d5ec7f90f0eb3cb380
+        S3Key: ac72c189a290a06e9cf9a37412462afd
       FunctionName: logoApplicationGetter
       Handler: index.handler
       Role:
@@ -262,6 +332,8 @@ Resources:
             Fn::Sub: image-logoapplication-${AWS::AccountId}
           TableName:
             Ref: OutputDatabase
+          websiteBucket:
+            Ref: WebsiteBucket
   WebsiteBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
@@ -392,7 +464,7 @@ Resources:
     Properties:
       Code:
         S3Bucket: logoapplication-lambdafiles-34fl9as0
-        S3Key: 3a11bbe8032e1d73f5944fb8786d5508
+        S3Key: 6a813131b4eca5535aa9435986838568
       Handler: lambda_function.lambda_handler
       Role:
         Fn::GetAtt:
@@ -459,7 +531,7 @@ Resources:
     Properties:
       Code:
         S3Bucket: logoapplication-lambdafiles-34fl9as0
-        S3Key: 4fa94db47bc424a60e72f01191cbb3f4
+        S3Key: d989e32d0b2ea972c28d406a1d75fcbf
       Environment:
         Variables:
           website_bucket: logoapplication-website-39bk35l8
