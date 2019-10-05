@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="./css/style.css">
     <title>Scalable Logo Recognition</title>
 </head>
-<body>
+<body onload="javascript:add_logo_images()">
     <header>
         <nav id="navbar">
             <div class="container">
@@ -39,12 +39,20 @@
 
     </header>
 
-                                  
+    <div id="middle">
+        <div class="container">
+            <div id="classes">
+                <h2>The learned logo classes</h2>
+            </div>
+        </div>
+    </div>
+
+    <script>const API_URL = 'https://jyzeh86m1h.execute-api.eu-west-1.amazonaws.com/prod'</script>     
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="./js/uploadImage.js" type="text/javascript"></script>
     <script src="./js/getLabel.js" type="text/javascript"></script>
+    <script src="./js/add_logos.js" type="text/javascript" ></script>
     <script>
-        const API_URL = 'https://jyzeh86m1h.execute-api.eu-west-1.amazonaws.com/prod'
 
         function getBinary(input) {
             const file = input.files[0];

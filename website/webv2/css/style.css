@@ -119,6 +119,36 @@ p {
     font-size: 20px;
 }
 
+/* Middle */
+
+#middle {
+    background: #333;
+    overflow: auto;
+}
+
+#middle h2 {
+    text-align: center;
+    padding: 80px;
+    color: #f7c08a;
+    font-size: 30px;
+}
+
+#classes img {
+    width: 100px;
+    height: 100px;
+}
+
+#classes figure {
+    margin:0;
+    padding: 30px 30px;
+    float: left;
+}
+
+#classes figure figcaption {
+    color:#fff;
+    text-align: center;
+}
+
 /* #classes img {
     width: 100px;
     height: 100px;
