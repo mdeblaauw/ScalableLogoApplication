@@ -27,8 +27,8 @@
                         It has learned to recognise logo classes with only five training samples per logo class. Try it out!</p>
                     <input id="input-button" type="file" name="input" accept="image/png, image/jpeg" onchange="getBinary(this);">
                     <label class="btn" for="input-button">Submit a picture</label>
-                    <!-- TODO loading gif -->
                     <div id="loading"></div> 
+                    <img id="spinner" src="./img/spinner.gif" alt="loading gif">
                     <div id="answer">
                         <p id="output" ></p>
                         <!-- TODO let user submit if output is correct -->
@@ -55,16 +55,30 @@
     <script>
 
         function getBinary(input) {
+            spinner_switch();
+            clean_output();
             const file = input.files[0];
             const reader = new FileReader();
             reader.readAsBinaryString(file);
             reader.onload = async function () {
                 const imageId = await uploadImage(reader.result, file.type);
                 return await getLabel(imageId);
-            }
+            };
             reader.onerror = function (error) {
                 console.log('Error: ', error);
-            }
+            };
+        };
+
+        function spinner_switch(toggle) {
+            if (toggle === "hide") {
+                document.getElementById("spinner").style.visibility = "hidden";
+            } else {
+                document.getElementById("spinner").style.visibility = "visible";
+            }  
+        };
+
+        function clean_output(){
+            document.getElementById("output").innerHTML = "";
         }
 
     </script>

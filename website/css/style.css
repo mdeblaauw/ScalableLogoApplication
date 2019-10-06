@@ -92,7 +92,7 @@ p {
 /* Showcase */
 #showcase{
     background: url('../img/logos.jpg') no-repeat center center/cover;
-    height:850px;
+    height:1100px;
 }
 
 #showcase .showcase-content {
@@ -109,13 +109,13 @@ p {
 	z-index: -1;
 }
 
-/* implement with javascript */
-#showcase .showcase-content #answer {
-    /* visibility: hidden; */
+#showcase .showcase-content #spinner {
+    margin-top: 40px;
+    visibility: hidden;
 }
 
 #showcase .showcase-content #output {
-    padding-top: 100px;
+    /* padding-top: 10px; */
     font-size: 20px;
 }
 
