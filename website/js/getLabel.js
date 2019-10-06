@@ -22,7 +22,8 @@ async function getLabel(imageId) {
                 console.log(response.data);
                 const probLabel = response.data.ProbLabel.S;
                 let maxProb = response.data.MaxProb.N * 100;
-                const answer = `The model is ${maxProb.toFixed(0)}% sure that the ${probLabel} logo is in the submitted picture.`;
+                const minDist = response.data.MinDist.N;
+                const answer = `The model is ${maxProb.toFixed(0)}% sure that the ${probLabel} logo is in the submitted picture. (Min distance is ${minDist})`;
                 document.getElementById("output").innerHTML = answer;
                 return console.log(response.data.ProbLabel.S);
             }

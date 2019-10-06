@@ -60,7 +60,7 @@ const getLabel = async function(imageId) {
     Key: {
       'ImageId': {S: imageId}
     },
-    ProjectionExpression: 'MaxProb, ProbLabel'
+    ProjectionExpression: 'MaxProb, ProbLabel, MinDist'
   };
 
   // Call DynamoDB to read the item from the table and return
