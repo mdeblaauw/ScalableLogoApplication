@@ -300,11 +300,11 @@ Resources:
   GetLambda:
     Type: AWS::Lambda::Function
     Properties:
-      Code: ./lambda_functions/get_function/index.js
+      Code: ./lambda_functions/get_function/
       FunctionName: logoApplicationGetter
       Handler: index.handler
       Role: !GetAtt LambdaRole.Arn
-      Runtime: nodejs8.10
+      Runtime: nodejs10.x
       Timeout: 10
       Environment: 
         Variables:
