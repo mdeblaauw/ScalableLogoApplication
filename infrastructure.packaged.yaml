@@ -1,14 +1,37 @@
 Description: This template includes infrastructure, modelFunction infrastructure and
   get label infrastructure
+Parameters:
+  EnvType:
+    Description: Environment type
+    Default: dev
+    Type: String
+    AllowedValues:
+    - prod
+    - dev
+    ConstraintDescription: must specify prod or dev
+  ProdVersion:
+    Description: Product version
+    Type: String
+Conditions:
+  CreateProdResource:
+    Fn::Equals:
+    - Ref: EnvType
+    - prod
+  CreateDevResource:
+    Fn::Equals:
+    - Ref: EnvType
+    - dev
 Resources:
-  ImageBucket:
+  ImageBucketProd:
     Type: AWS::S3::Bucket
+    Condition: CreateProdResource
+    DeletionPolicy: Retain
     DependsOn:
     - ModelFunctionLambdaImageBucket
     - ModelFunctionLambda
     Properties:
       BucketName:
-        Fn::Sub: image-logoapplication-${AWS::AccountId}
+        Fn::Sub: image-logoapplication-${AWS::AccountId}-${EnvType}-${ProdVersion}
       NotificationConfiguration:
         LambdaConfigurations:
         - Event: s3:ObjectCreated:Put
@@ -34,9 +57,61 @@ Resources:
       CorsConfiguration:
         CorsRules:
         - AllowedOrigins:
-          - Fn::GetAtt:
-            - WebsiteBucket
-            - WebsiteURL
+          - Fn::If:
+            - CreateProdResource
+            - http://scalablelogorecognition.com
+            - Fn::GetAtt:
+              - WebsiteBucket
+              - WebsiteURL
+          AllowedMethods:
+          - PUT
+          AllowedHeaders:
+          - '*'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+  ImageBucketDev:
+    Type: AWS::S3::Bucket
+    Condition: CreateDevResource
+    DependsOn:
+    - ModelFunctionLambdaImageBucket
+    - ModelFunctionLambda
+    Properties:
+      BucketName:
+        Fn::Sub: image-logoapplication-${AWS::AccountId}-${EnvType}-${ProdVersion}
+      NotificationConfiguration:
+        LambdaConfigurations:
+        - Event: s3:ObjectCreated:Put
+          Filter:
+            S3Key:
+              Rules:
+              - Name: suffix
+                Value: .jpg
+          Function:
+            Fn::GetAtt:
+            - ModelFunctionLambda
+            - Arn
+        - Event: s3:ObjectCreated:Put
+          Filter:
+            S3Key:
+              Rules:
+              - Name: suffix
+                Value: .png
+          Function:
+            Fn::GetAtt:
+            - ModelFunctionLambda
+            - Arn
+      CorsConfiguration:
+        CorsRules:
+        - AllowedOrigins:
+          - Fn::If:
+            - CreateProdResource
+            - http://scalablelogorecognition.com
+            - Fn::GetAtt:
+              - WebsiteBucket
+              - WebsiteURL
           AllowedMethods:
           - PUT
           AllowedHeaders:
@@ -49,7 +124,8 @@ Resources:
   GetRestAPI:
     Type: AWS::ApiGateway::RestApi
     Properties:
-      Name: scalableLogo-GetRestAPI
+      Name:
+        Fn::Sub: scalableLogo-GetRestAPI-${EnvType}
   GetRestAPIResource:
     Type: AWS::ApiGateway::Resource
     Properties:
@@ -299,7 +375,7 @@ Resources:
             - s3:PutObject
             - s3:PutObjectAcl
             Resource:
-            - Fn::Sub: arn:aws:s3:::image-logoapplication-${AWS::AccountId}/*
+            - Fn::Sub: arn:aws:s3:::image-logoapplication-${AWS::AccountId}-${EnvType}-${ProdVersion}/*
           - Effect: Allow
             Action: s3:ListBucket
             Resource:
@@ -307,37 +383,58 @@ Resources:
           - Effect: Allow
             Action: dynamodb:GetItem
             Resource:
-              Fn::GetAtt:
-              - OutputDatabase
-              - Arn
+              Fn::If:
+              - CreateProdResource
+              - Fn::GetAtt:
+                - OutputDatabaseProd
+                - Arn
+              - Fn::GetAtt:
+                - OutputDatabaseDev
+                - Arn
   GetLambda:
     Type: AWS::Lambda::Function
     Properties:
       Code:
         S3Bucket: logoapplication-lambdafiles-34fl9as0
         S3Key: 8bb177db5affb97bffdc177374813b43
-      FunctionName: logoApplicationGetter
+      FunctionName:
+        Fn::Sub: logoApplicationGetter-${AWS::AccountId}-${EnvType}
       Handler: index.handler
       Role:
         Fn::GetAtt:
         - LambdaRole
         - Arn
-      Runtime: nodejs8.10
+      Runtime: nodejs10.x
       Timeout: 10
       Environment:
         Variables:
           REGION:
             Ref: AWS::Region
           uploadBucket:
-            Fn::Sub: image-logoapplication-${AWS::AccountId}
+            Fn::Sub: image-logoapplication-${AWS::AccountId}-${EnvType}-${ProdVersion}
           TableName:
-            Ref: OutputDatabase
+            Fn::If:
+            - CreateProdResource
+            - Ref: OutputDatabaseProd
+            - Ref: OutputDatabaseDev
           websiteBucket:
             Ref: WebsiteBucket
+  WWWBucket:
+    Type: AWS::S3::Bucket
+    Condition: CreateProdResource
+    Properties:
+      BucketName: www.scalablelogorecognition.com
+      WebsiteConfiguration:
+        RedirectAllRequestsTo:
+          HostName: scalablelogorecognition.com
   WebsiteBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
-      Bucket: logoapplication-website-39bk35l8
+      Bucket:
+        Fn::If:
+        - CreateProdResource
+        - scalablelogorecognition.com
+        - logoapplication-website-39bk35l8
       PolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -349,7 +446,11 @@ Resources:
   WebsiteBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: logoapplication-website-39bk35l8
+      BucketName:
+        Fn::If:
+        - CreateProdResource
+        - scalablelogorecognition.com
+        - logoapplication-website-39bk35l8
       PublicAccessBlockConfiguration:
         BlockPublicAcls: false
       WebsiteConfiguration:
@@ -358,7 +459,7 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName:
-        Fn::Sub: preparation-logoapplication-${AWS::AccountId}
+        Fn::Sub: preparation-logoapplication-${AWS::AccountId}-${EnvType}
       NotificationConfiguration:
         LambdaConfigurations:
         - Event: s3:ObjectCreated:Put
@@ -391,7 +492,7 @@ Resources:
         - Arn
       Principal: s3.amazonaws.com
       SourceArn:
-        Fn::Sub: arn:aws:s3:::preparation-logoapplication-${AWS::AccountId}
+        Fn::Sub: arn:aws:s3:::preparation-logoapplication-${AWS::AccountId}-${EnvType}
   PreparationModelFunctionLambdaPermission:
     Type: AWS::Lambda::Permission
     Properties:
@@ -402,10 +503,29 @@ Resources:
         - Arn
       Principal: s3.amazonaws.com
       SourceArn:
-        Fn::Sub: arn:aws:s3:::preparation-logoapplication-${AWS::AccountId}
-  OutputDatabase:
+        Fn::Sub: arn:aws:s3:::preparation-logoapplication-${AWS::AccountId}-${EnvType}
+  OutputDatabaseProd:
     Type: AWS::DynamoDB::Table
+    Condition: CreateProdResource
+    DeletionPolicy: Retain
     Properties:
+      TableName:
+        Fn::Sub: logoapplication-dynamodb-${AWS::AccountId}-${EnvType}-${ProdVersion}
+      AttributeDefinitions:
+      - AttributeName: ImageId
+        AttributeType: S
+      KeySchema:
+      - AttributeName: ImageId
+        KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+  OutputDatabaseDev:
+    Type: AWS::DynamoDB::Table
+    Condition: CreateDevResource
+    Properties:
+      TableName:
+        Fn::Sub: logoapplication-dynamodb-${AWS::AccountId}-${EnvType}-${ProdVersion}
       AttributeDefinitions:
       - AttributeName: ImageId
         AttributeType: S
@@ -449,16 +569,21 @@ Resources:
             - s3:GetObject
             - s3:ListBucket
             Resource:
-            - Fn::Sub: arn:aws:s3:::preparation-logoapplication-${AWS::AccountId}/*
-            - Fn::Sub: arn:aws:s3:::preparation-logoapplication-${AWS::AccountId}
-            - Fn::Sub: arn:aws:s3:::image-logoapplication-${AWS::AccountId}/*
-            - Fn::Sub: arn:aws:s3:::image-logoapplication-${AWS::AccountId}
+            - Fn::Sub: arn:aws:s3:::preparation-logoapplication-${AWS::AccountId}-${EnvType}/*
+            - Fn::Sub: arn:aws:s3:::preparation-logoapplication-${AWS::AccountId}-${EnvType}
+            - Fn::Sub: arn:aws:s3:::image-logoapplication-${AWS::AccountId}-${EnvType}-${ProdVersion}/*
+            - Fn::Sub: arn:aws:s3:::image-logoapplication-${AWS::AccountId}-${EnvType}-${ProdVersion}
           - Effect: Allow
             Action: dynamodb:PutItem
             Resource:
-              Fn::GetAtt:
-              - OutputDatabase
-              - Arn
+              Fn::If:
+              - CreateProdResource
+              - Fn::GetAtt:
+                - OutputDatabaseProd
+                - Arn
+              - Fn::GetAtt:
+                - OutputDatabaseDev
+                - Arn
   ModelFunctionLambda:
     Type: AWS::Lambda::Function
     Properties:
@@ -478,11 +603,14 @@ Resources:
       Environment:
         Variables:
           TableName:
-            Ref: OutputDatabase
+            Fn::If:
+            - CreateProdResource
+            - Ref: OutputDatabaseProd
+            - Ref: OutputDatabaseDev
           image_bucket:
-            Fn::Sub: image-logoapplication-${AWS::AccountId}
+            Fn::Sub: image-logoapplication-${AWS::AccountId}-${EnvType}-${ProdVersion}
           preparation_bucket:
-            Fn::Sub: preparation-logoapplication-${AWS::AccountId}
+            Fn::Sub: preparation-logoapplication-${AWS::AccountId}-${EnvType}
   ModelFunctionLambdaImageBucket:
     Type: AWS::Lambda::Permission
     Properties:
@@ -493,7 +621,7 @@ Resources:
         - Arn
       Principal: s3.amazonaws.com
       SourceArn:
-        Fn::Sub: arn:aws:s3:::image-logoapplication-${AWS::AccountId}
+        Fn::Sub: arn:aws:s3:::image-logoapplication-${AWS::AccountId}-${EnvType}-${ProdVersion}
   PreparationFunctionLambdaRole:
     Type: AWS::IAM::Role
     Properties:
@@ -522,10 +650,16 @@ Resources:
             - s3:ListBucket
             - s3:PutObject
             Resource:
-            - Fn::Sub: arn:aws:s3:::preparation-logoapplication-${AWS::AccountId}/*
-            - Fn::Sub: arn:aws:s3:::preparation-logoapplication-${AWS::AccountId}
-            - Fn::Sub: arn:aws:s3:::logoapplication-website-39bk35l8/*
-            - Fn::Sub: arn:aws:s3:::logoapplication-website-39bk35l8
+            - Fn::Sub: arn:aws:s3:::preparation-logoapplication-${AWS::AccountId}-${EnvType}/*
+            - Fn::Sub: arn:aws:s3:::preparation-logoapplication-${AWS::AccountId}-${EnvType}
+            - Fn::If:
+              - CreateProdResource
+              - Fn::Sub: arn:aws:s3:::scalablelogorecognition.com/*
+              - Fn::Sub: arn:aws:s3:::logoapplication-website-39bk35l8/*
+            - Fn::If:
+              - CreateProdResource
+              - Fn::Sub: arn:aws:s3:::scalablelogorecognition.com
+              - Fn::Sub: arn:aws:s3:::logoapplication-website-39bk35l8
   PreparationFunctionLambda:
     Type: AWS::Lambda::Function
     Properties:
@@ -534,7 +668,11 @@ Resources:
         S3Key: d989e32d0b2ea972c28d406a1d75fcbf
       Environment:
         Variables:
-          website_bucket: logoapplication-website-39bk35l8
+          website_bucket:
+            Fn::If:
+            - CreateProdResource
+            - scalablelogorecognition.com
+            - logoapplication-website-39bk35l8
       Handler: lambda_function.lambda_handler
       Layers:
       - Ref: PytorchLambdaLayer
@@ -551,7 +689,8 @@ Outputs:
     Value:
       Fn::Sub: https://${GetRestAPI}.execute-api.${AWS::Region}.amazonaws.com/prod
     Export:
-      Name: GetApiURL
+      Name:
+        Fn::Sub: GetApiURL-${EnvType}
   WebsiteUrl:
     Description: URL of the website
     Value:
@@ -559,10 +698,12 @@ Outputs:
       - WebsiteBucket
       - WebsiteURL
     Export:
-      Name: WebsiteURL
+      Name:
+        Fn::Sub: WebsiteURL-${EnvType}
   PreparationBucketName:
     Description: Name of bucket to dump preparation files
     Value:
       Ref: PreparationBucket
     Export:
-      Name: PrepBucketName
+      Name:
+        Fn::Sub: PrepBucketName-${EnvType}
