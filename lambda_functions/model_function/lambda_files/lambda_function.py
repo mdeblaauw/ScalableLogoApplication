@@ -4,7 +4,7 @@ from io import BytesIO
 import os
 import time
 from torchvision import transforms
-from PIL import Image
+from PIL import Image, ExifTags
 from resnet_model import ResNet18
 from protonet import *
 
@@ -60,6 +60,24 @@ def prepare_model(prepare_path):
     s3.download_file(os.environ['preparation_bucket'], 'preparation-files/prototypes.pt',prepare_path + '/prototypes.pt')
     s3.download_file(os.environ['preparation_bucket'], 'preparation-files/reverse_class_mapping.json',prepare_path + '/reverse_class_mapping.json')
 
+def rotate_image_back(image):
+    orientation = 0x0112
+    exif = image._getexif()
+    if exif is not None:
+        try:
+            orientation = exif[orientation]
+            rotations = {
+                3: Image.ROTATE_180,
+                6: Image.ROTATE_270,
+                8: Image.ROTATE_90
+            }
+            if orientation in rotations:
+                print('image is rotated')
+                image = image.transpose(rotations[orientation])
+        except KeyError as error:
+            print('KeyError - reason "%s"' % str(error))
+    return(image)
+
 def get_image(event):
     for record in event['Records']:
         bucket = record['s3']['bucket']['name']
@@ -69,7 +87,13 @@ def get_image(event):
 
     with BytesIO() as files:
         s3.download_fileobj(bucket, file_key, files)
-        query = Image.open(files).convert("RGB")
+        query = Image.open(files)
+
+        if hasattr(query, '_getexif'):
+            print('image has exif')
+            query = rotate_image_back(query)
+
+        query = query.convert("RGB")
 
         return query,file_key
 
