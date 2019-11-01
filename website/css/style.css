@@ -148,3 +148,25 @@ p {
     color:#fff;
     text-align: center;
 }
+
+/* About section */
+
+#showcaseV2{
+    background: url('../img/logos.jpg') no-repeat center center/cover;
+    height:1200px;
+}
+
+#showcaseV2 .showcase-contentV2 {
+    text-align: center;
+    padding-top: 20px;
+}
+
+#thesis-link {
+    color: #f7c08a;
+    font-size: 30px;
+    padding:20px 20px;
+}
+
+#above-download {
+    padding-bottom: 50px;
+}
