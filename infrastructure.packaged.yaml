@@ -590,7 +590,7 @@ Resources:
     Properties:
       Code:
         S3Bucket: logoapplication-lambdafiles-34fl9as0
-        S3Key: 6a813131b4eca5535aa9435986838568
+        S3Key: 3c20befd3d64c53d088533ea622b209e
       Handler: lambda_function.lambda_handler
       Role:
         Fn::GetAtt:
