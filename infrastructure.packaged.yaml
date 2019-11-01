@@ -323,7 +323,8 @@ Resources:
     Properties:
       RestApiId:
         Ref: GetRestAPI
-      StageName: prod
+      StageName:
+        Fn::Sub: ${EnvType}
       DeploymentId:
         Ref: GetRestAPIDeployment
   GetRestAPIDeployment:
@@ -687,7 +688,7 @@ Outputs:
   GetAPIURL:
     Description: URL of get API
     Value:
-      Fn::Sub: https://${GetRestAPI}.execute-api.${AWS::Region}.amazonaws.com/prod
+      Fn::Sub: https://${GetRestAPI}.execute-api.${AWS::Region}.amazonaws.com/${EnvType}
     Export:
       Name:
         Fn::Sub: GetApiURL-${EnvType}

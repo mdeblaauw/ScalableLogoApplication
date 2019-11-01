@@ -8,7 +8,6 @@
     <title>About</title>
 </head>
 <body>
-
     <header>
         <nav id="navbar">
             <div class="container">
@@ -19,17 +18,29 @@
                 </ul>
             </div>
         </nav>
+
+        <div id="showcaseV2">
+            <div class="container">
+                <div class="showcase-contentV2">
+                    <div>
+                        <div>
+                            <h1 class="text-primary">The motivation of this application</h1>
+                            <p>To help people deal with the vast amount of information they face during attendance of a conference, we want to create an application which can automatically store information from an organisation by taking a picture of its logo. Our goal is to create a scalable logo classifier that is widely applicable for conferences. To do this, we created a meta-learning classifier that can learn different sets of logo classes with only five training samples per class. This means that every logo class in this application is prepared with only five training samples.</p>
+                        </div>
+                        <div>
+                            <h1 class="text-primary">Infrastructure of this application</h1>
+                            <p>This is a serverless AI-driven application constructed with AWS services. This means that no server is running in the backend while there are no requests. However, when there is a request, the required computation needed is automaticly reserved. We did this by deploying a deep meta-learning Pytorch model using primarily AWS Lambda functions.</p>
+                        </div>
+                        <div>
+                            <h1 class="text-primary">Thesis</h1>
+                            <p id="above-download">This implementation is based on my thesis work. If you are interested you can download it here:</p>
+                            <a id="thesis-link" href="mdeblaauw_master_thesis.pdf" download>
+                            <label class="btn" for="thesis-link">Download thesis</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>        
     </header>
-
-    <div class="clear"></div>
-
-        <div>
-            <h1>This is the about section</h1>
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quae, error!</p>
-        </div>
-        <div>
-            <h2>Welcome</h2>
-            <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Tempora dolores quam, consectetur veniam non alias sapiente vitae ipsum voluptas perspiciatis. A aperiam sint ab obcaecati doloremque expedita temporibus corrupti sed blanditiis animi facere aspernatur fuga libero eum cum laboriosam ex nesciunt totam, delectus itaque nihil assumenda. Laborum quisquam vitae dolorem?</p>
-        </div>
 </body>
 </html>
