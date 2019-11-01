@@ -23,10 +23,9 @@
             <div class="container">
                 <div class="showcase-content">
                     <h1 class="text-primary">A Scalable Logo Recognition Demo Application</h1>
-                    <p class="lead">This is an online demo application of a deep meta-learning model that recognises logos from images. 
-                        It has learned to recognise logo classes with only five training samples per logo class. Try it out!</p>
+                    <p class="lead">A deep meta-learning model has learned to recognise logo classes with only five training samples per logo class. Try it out!</p>
                     <input id="input-button" type="file" name="input" accept="image/png, image/jpeg" onchange="getBinary(this);">
-                    <label class="btn" for="input-button">Submit a picture</label>
+                    <label class="btn" for="input-button">Click to take a picture</label>
                     <div id="loading"></div> 
                     <img id="spinner" src="./img/spinner.gif" alt="loading gif">
                     <div id="answer">
@@ -47,7 +46,7 @@
         </div>
     </div>
 
-    <script>const API_URL = 'https://bkmw2kjosj.execute-api.eu-west-1.amazonaws.com/prod'</script>     
+    <script>const API_URL = 'https://qwo3xxx763.execute-api.eu-west-1.amazonaws.com/dev'</script>     
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="./js/uploadImage.js" type="text/javascript"></script>
     <script src="./js/getLabel.js" type="text/javascript"></script>

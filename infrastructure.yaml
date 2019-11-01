@@ -296,7 +296,7 @@ Resources:
     Type: AWS::ApiGateway::Stage
     Properties:
       RestApiId: !Ref GetRestAPI
-      StageName: prod
+      StageName: !Sub ${EnvType}
       DeploymentId: !Ref GetRestAPIDeployment
 
   GetRestAPIDeployment:
@@ -608,7 +608,7 @@ Resources:
 Outputs:
   GetAPIURL:
     Description: URL of get API
-    Value: !Sub https://${GetRestAPI}.execute-api.${AWS::Region}.amazonaws.com/prod
+    Value: !Sub https://${GetRestAPI}.execute-api.${AWS::Region}.amazonaws.com/${EnvType}
     Export:
       Name: !Sub GetApiURL-${EnvType}
   WebsiteUrl:
