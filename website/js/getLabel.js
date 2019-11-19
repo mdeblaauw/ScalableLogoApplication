@@ -1,4 +1,4 @@
-const delayMs = 2000;
+const delayMs = 300;
 
 async function getLabel(imageId) {
     console.log(imageId);
@@ -10,9 +10,9 @@ async function getLabel(imageId) {
     };
 
      async function getImageLabel() {
-        await delay(delayMs);
+        // await delay(delayMs);
         let count = 0;
-        while (count < 7){
+        while (count < 30){
             const response = await axios({
                 method: 'GET',
                 url: API_URL + "/get-label",

@@ -23,10 +23,8 @@ def lambda_handler(event, context):
     if bucket == os.environ['preparation_bucket']:
         prepare_model("/tmp/preparation-files")
     else:
-        load_and_store_files("/tmp/model-weights", "/tmp/preparation-files")
         print(event)
         query,file_key = get_image(event)
-        model = install_model()
         values = make_inference(query, model)
         store_values(values, file_key)
 
@@ -34,7 +32,6 @@ def lambda_handler(event, context):
         'statusCode': 200,
         'body': json.dumps('Hello from Lambda!')
     }
-
 
 def load_and_store_files(weight_path, prepare_path):
     if not os.path.isdir(weight_path):
@@ -159,3 +156,6 @@ def store_values(values,file_key):
             "DistLabel": {'S': values[3]}
         }
     )
+
+load_and_store_files("/tmp/model-weights", "/tmp/preparation-files")
+model = install_model()
